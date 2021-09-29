@@ -4,7 +4,7 @@
 \alias{FDR_analysis}
 \title{Bayesian FDR Analysis}
 \usage{
-FDR_analysis(PL, tol = seq(0.1, 1, by = 0.05), min_rate = 0.05)
+FDR_analysis(PL, tol = seq(0.01, max(PL), by = 0.01), min_rate = 0.05)
 }
 \arguments{
 \item{PL}{The posterior probability of inclusion of each link according to \code{\link{FGM_sampler}}.
