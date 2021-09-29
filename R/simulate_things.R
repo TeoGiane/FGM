@@ -9,7 +9,8 @@
 #' the random generator can be fixed, this allows multiple replications of the same simulated data
 #' in order to perform multiple check on the performed analysis.
 #'
-#' @param S0 Natural number, the seed for the random generator for the data.
+#' @param data.seed Natural number, the seed for the random generator for the data.
+#' @param graph.seed Natural number, the seed for the random generator for the Graph-Precision Matrix pair.
 #' @param X.axis An r-dimensional vector that contains the abscissa points in which the data are evaluated.
 #' @param dims A named vector collecting the dimensions of the input data, i.e. n, number of curves, r, number of gridpoints and p, the basis dimension.
 #' @param basis A string that declares which type of basis needs to be used in order to embed data in their
@@ -20,9 +21,9 @@
 #' @return A list containing all the simulated data for the Functional Graphical Model in the form of an FGM object and a list with the parameters of simulation, that can be useful for debugging purposes.
 
 #' @export
-FGM_sim <- function(S0, X.axis, dims, basis = "Spline", method, sparsity = 0.3, type = 4) {
+FGM_sim <- function(data.seed, graph.seed, X.axis, dims, basis = "Spline", method, sparsity = 0.3, type = 4) {
 
-  if(is.null(S0) || is.null(X.axis) || is.null(dims) || is.null(method)){
+  if(is.null(data.seed) || is.null(graph.seed) || is.null(X.axis) || is.null(dims) || is.null(method)){
     stop("One or more inputs are missing, with no default.")
   }
 
@@ -44,12 +45,11 @@ FGM_sim <- function(S0, X.axis, dims, basis = "Spline", method, sparsity = 0.3, 
     stop("Unrecognized type of spline required.")
   }
 
-  #temp <- create_structure(n = n, p = p)
   tau_eps <- 100
-  set.seed(S0)
+  set.seed(data.seed)
   mu <- as.numeric(BDgraph::rmvnorm(n = 1, mean = rep(0, p), sigma = 0.001*diag(p)))
 
-  list_G_K <- KG_sim(method, p, sparsity, S0, type)
+  list_G_K <- KG_sim(method, p, sparsity, graph.seed, type)
   G <- list_G_K$G
   K <- list_G_K$K
 
@@ -57,9 +57,9 @@ FGM_sim <- function(S0, X.axis, dims, basis = "Spline", method, sparsity = 0.3, 
   data <- matrix(0, nrow = n, ncol = r)
   K_inv <- solve(K)
   for (i in 1:n) {
-    set.seed(S0 + i)
+    set.seed(data.seed + i)
     beta[i, ] <- BDgraph::rmvnorm(n = 1, mean = mu, sigma = K_inv)
-    set.seed(S0 + 10*i)
+    set.seed(data.seed + 10*i)
     data[i, ] <- BDgraph::rmvnorm(n = 1, mean = basemat %*% beta[i, ], sigma = diag(rep(1/tau_eps, r)))
   }
 
@@ -77,8 +77,8 @@ FGM_sim <- function(S0, X.axis, dims, basis = "Spline", method, sparsity = 0.3, 
   simulated_data[[1]] <- FGM(X.axis, data, basis = "Spline", dim.basis = p)
   simulated_data[[2]] <- params
   names(simulated_data) <- c("FGMobj", "params")
-  #names(simulated_data) <- c('data', 'beta', 'mu', 'tau_eps', 'G', 'K', 'FGM_structure')
 
+  # Return function output
   return(simulated_data)
 
 }
