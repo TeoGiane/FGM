@@ -4,10 +4,21 @@
 \alias{FGM_sim}
 \title{Functional Graphical Model simulation}
 \usage{
-FGM_sim(S0, X.axis, dims, basis = "Spline", method, sparsity = 0.3, type = 4)
+FGM_sim(
+  data.seed,
+  graph.seed,
+  X.axis,
+  dims,
+  basis = "Spline",
+  method,
+  sparsity = 0.3,
+  type = 4
+)
 }
 \arguments{
-\item{S0}{Natural number, the seed for the random generator for the data.}
+\item{data.seed}{Natural number, the seed for the random generator for the data.}
+
+\item{graph.seed}{Natural number, the seed for the random generator for the Graph-Precision Matrix pair.}
 
 \item{X.axis}{An r-dimensional vector that contains the abscissa points in which the data are evaluated.}
 
