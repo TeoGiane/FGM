@@ -1,6 +1,6 @@
 Package: FGM
 Title: Bayesian Functional Graphical Models with R
-Version: 1.0.26
+Version: 1.0.26-1
 Authors@R: 
     person(given = "Laura",
            family = "Codazzi",
