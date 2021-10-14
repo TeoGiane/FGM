@@ -498,27 +498,15 @@ void select_multi_edges( double rates[], int index_selected_edges[], int *size_i
 
 // log_ratio_g_prior contains log(g_prior[ij]/(1-g_prior[ij])) if called in the Bernoulli case, or it contains the Beta hyparameters (a,b) if called in the BetaBernouolli case.
 // Prior is 1 for BetaBernoulli case, 2 for Bernoulli case
-void rates_bdmcmc_parallel( double rates[], double log_ratio_g_prior[], int *Prior, int G[], int index_row[], int index_col[], int *sub_qp, double Ds[], double Dsijj[],
+void rates_bdmcmc_parallel( double rates[], double log_ratio_g_prior[], int *Prior, int G[], int *ptr_E, int index_row[], int index_col[], int *sub_qp, double Ds[], double Dsijj[],
 				            double sigma[], double K[], int *b, int *p )
 {
 	int b1 = *b, one = 1, two = 2, dim = *p, p1 = dim - 1, p2 = dim - 2, dim1 = dim + 1, p2x2 = ( dim - 2 ) * 2;
 	double alpha = 1.0, beta = 0.0, alpha1 = -1.0, beta1 = 1.0;
 	char transT = 'T', transN = 'N', sideL = 'L';																	
-
-	int E(0); //number of link currently in the graph
 	int possible_links = dim*(dim-1)*0.5;
-	if(*Prior == 1)
-	{
-		int ij(-1);
-		for(int j = 1; j < dim; j++ ){
-			for(int i = 0; i < j; i++ )
-			{
-			    ij = j * dim + i;
-			    E += G[ij];
-			}    
-		}
+	int E = *ptr_E;
 
-	}
 	#pragma omp parallel
 	{
 		int i, j, k, ij, jj, nu_star;
@@ -601,15 +589,11 @@ void rates_bdmcmc_parallel( double rates[], double log_ratio_g_prior[], int *Pri
 			else if(*Prior == 1){ //BetaBernoulli
 
 				if(G[ij] == 1){ //death move
-					if(E==0){
-						std::cout<<"NON POSSO MORIRE IN GRAFO VUOTO"<<std::endl;
-					}
+					//Empty graphs can not enter in this case
 					log_rate += log((possible_links - E)/(log_ratio_g_prior[1] + possible_links - E - 1)) + log( (log_ratio_g_prior[0]+E)/(E) );
 				}
 				else{ //birth move
-					if(E==possible_links){
-						std::cout<<"NON POSSO NASCERE IN GRAFO PIENO"<<std::endl;
-					}
+					//Complete graphs can not enter in this case
 					log_rate += log((log_ratio_g_prior[1] + possible_links - E)/(possible_links - E)) + log( (E)/(log_ratio_g_prior[0]+E-1) );
 				}
 			}

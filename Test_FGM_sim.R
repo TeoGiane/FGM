@@ -8,7 +8,7 @@ r <- as.numeric(dati_simulati$FGMobj$dims['r'])
 p <- as.numeric(dati_simulati$FGMobj$dims['p'])
 
 # Setting prior parameters ------------------------------------------------
-gprior <- c(0.5,0.5)
+gprior <- c(1,1)
 hyper <- list()
 hyper[[1]] <- 2 * 10
 hyper[[2]] <- 2 * 0.001
@@ -20,10 +20,10 @@ names(hyper) <- c('a_tau_eps', 'b_tau_eps', 'sigma_mu', 'd0', 'D0', 'gprior')
 init = dati_simulati$FGMobj$init
 
 # Setting sampler parameter -----------------------------------------------
-niter <- 6000
-nburn <- 1000
-thin  <- 20
-thinG <- 1
+niter <-  20
+nburn <-  0
+thin  <-  1
+thinG <-  1
 iter_to_store <- (niter - nburn)/thin
 iter_to_storeG <- (niter - nburn)/thinG
 

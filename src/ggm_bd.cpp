@@ -69,11 +69,15 @@ void ggm_bdmcmc_map( int *iter, int *burnin, int G[], double g_prior[], int *FGM
 	vector<int> index_col( qp );
 	int counter = 0;
 	vector<double> Dsijj( pxp ); 
+	int FGM_E(0);
 	for( j = 1; j < dim; j++ )
 		for( i = 0; i < j; i++ )
 		{
 		    ij = j * dim + i;
 		    
+		    if(G[ij]==1){
+		    	FGM_E++;
+		    }
 		    if(PriorType==2){
 
 		    	if( ( g_prior[ ij ] != 0.0 ) or ( g_prior[ ij ] != 1.0 ) )
@@ -93,6 +97,7 @@ void ggm_bdmcmc_map( int *iter, int *burnin, int G[], double g_prior[], int *FGM
 		    Dsij        = Ds[ ij ];
 		    Dsijj[ ij ] = Dsij * Dsij / Ds[ j * dim + j ]; 
 		}
+
 
 	int sub_qp = counter;
 	vector<double> rates( sub_qp );
@@ -128,10 +133,10 @@ void ggm_bdmcmc_map( int *iter, int *burnin, int G[], double g_prior[], int *FGM
 // - - - STEP 1: calculating birth and death rates - - - - - - - - - - - - - - - - - - - - - - - - |		
 		if(PriorType==2){
 
-			rates_bdmcmc_parallel( &rates[0], &log_ratio_g_prior[0], &PriorType, G, &index_row[0], &index_col[0], &sub_qp, Ds, &Dsijj[0], &sigma[0], &K[0], b, &dim );
+			rates_bdmcmc_parallel( &rates[0], &log_ratio_g_prior[0], &PriorType, G, &FGM_E, &index_row[0], &index_col[0], &sub_qp, Ds, &Dsijj[0], &sigma[0], &K[0], b, &dim );
 		}
 		else{
-			rates_bdmcmc_parallel( &rates[0], &log_ratio_g_prior[0], &PriorType, G, &index_row[0], &index_col[0], &sub_qp, Ds, &Dsijj[0], &sigma[0], &K[0], b, &dim );
+			rates_bdmcmc_parallel( &rates[0], &log_ratio_g_prior[0], &PriorType, G, &FGM_E, &index_row[0], &index_col[0], &sub_qp, Ds, &Dsijj[0], &sigma[0], &K[0], b, &dim );
 		}
 		
 		
@@ -181,9 +186,9 @@ void ggm_bdmcmc_map( int *iter, int *burnin, int G[], double g_prior[], int *FGM
     			
 		// Updating G (graph) based on selected edge
 		selected_edge_ij    = selected_edge_j * dim + selected_edge_i;
+		(G[ selected_edge_ij ] == 1) ? FGM_E-- : FGM_E++; //update number of links currently in the graph
 		G[ selected_edge_ij ] = 1 - G[ selected_edge_ij ];
 		G[ selected_edge_i * dim + selected_edge_j ] = G[ selected_edge_ij ];
-
 		if( G[ selected_edge_ij ] )
 		{ 
 			++size_node[ selected_edge_i ]; 

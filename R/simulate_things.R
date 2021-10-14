@@ -47,7 +47,7 @@ FGM_sim <- function(data.seed, graph.seed, X.axis, dims, basis = "Spline", metho
 
   tau_eps <- 100
   set.seed(data.seed)
-  mu <- as.numeric(BDgraph::rmvnorm(n = 1, mean = rep(0, p), sigma = 0.001*diag(p)))
+  mu <- as.numeric(FGM::rmvnorm(n = 1, mean = rep(0, p), sigma = 0.001*diag(p)))
 
   list_G_K <- KG_sim(method, p, sparsity, graph.seed, type)
   G <- list_G_K$G
@@ -58,9 +58,9 @@ FGM_sim <- function(data.seed, graph.seed, X.axis, dims, basis = "Spline", metho
   K_inv <- solve(K)
   for (i in 1:n) {
     set.seed(data.seed + i)
-    beta[i, ] <- BDgraph::rmvnorm(n = 1, mean = mu, sigma = K_inv)
+    beta[i, ] <- FGM::rmvnorm(n = 1, mean = mu, sigma = K_inv)
     set.seed(data.seed + 10*i)
-    data[i, ] <- BDgraph::rmvnorm(n = 1, mean = basemat %*% beta[i, ], sigma = diag(rep(1/tau_eps, r)))
+    data[i, ] <- FGM::rmvnorm(n = 1, mean = basemat %*% beta[i, ], sigma = diag(rep(1/tau_eps, r)))
   }
 
   # Creaing the param list
