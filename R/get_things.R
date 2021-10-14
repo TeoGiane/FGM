@@ -13,33 +13,44 @@
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - |
 get_g_prior = function( g.prior, p )
 {
-    if( is.data.frame( g.prior ) ) g.prior <- data.matrix( g.prior )
-    if( inherits( g.prior, "dtCMatrix" ) ) g.prior = as.matrix( g.prior )
-    if( ( inherits( g.prior, "bdgraph"  ) ) | ( inherits( g.prior, "ssgraph" ) ) ) g.prior <- plinks( g.prior )
-    if( inherits( g.prior, "sim" ) ) 
-    {
-        K       = as.matrix( g.prior $ K )
-        g.prior = abs( K / diag( K ) )
-    }
-    
-    if( !is.matrix( g.prior ) )
-    {
-        if( ( g.prior <= 0 ) | ( g.prior >= 1 ) ) stop( " 'g.prior' must be between 0 and 1" )
-        g.prior = matrix( g.prior, p, p )
+    if(length(g.prior)==2){
+
+        g_prior = matrix( g.prior, nrow = 1, ncol = 2, byrow = T )
+        return(g_prior)
+
     }else{
-        if( ( nrow( g.prior ) != p ) | ( ncol( g.prior ) != p ) ) stop( " 'g.prior' and 'data' have non-conforming size" )
-        if( any( g.prior < 0 ) || any( g.prior > 1 ) ) stop( " Element of 'g.prior', as a matrix, must be between 0 and 1" )
+
+    
+        if( is.data.frame( g.prior ) ) g.prior <- data.matrix( g.prior )
+        if( inherits( g.prior, "dtCMatrix" ) ) g.prior = as.matrix( g.prior )
+        if( ( inherits( g.prior, "bdgraph"  ) ) | ( inherits( g.prior, "ssgraph" ) ) ) g.prior <- plinks( g.prior )
+        if( inherits( g.prior, "sim" ) ) 
+        {
+            K       = as.matrix( g.prior $ K )
+            g.prior = abs( K / diag( K ) )
+        }
+        
+        if( !is.matrix( g.prior ) )
+        {
+            if( ( g.prior <= 0 ) | ( g.prior >= 1 ) ) stop( " 'g.prior' must be between 0 and 1" )
+            g.prior = matrix( g.prior, p, p )
+        }else{
+            if( ( nrow( g.prior ) != p ) | ( ncol( g.prior ) != p ) ) stop( " 'g.prior' and 'data' have non-conforming size" )
+            if( any( g.prior < 0 ) || any( g.prior > 1 ) ) stop( " Element of 'g.prior', as a matrix, must be between 0 and 1" )
+        }
+        
+        g.prior[ lower.tri( g.prior, diag = TRUE ) ] <- 0
+        g.prior = g.prior + t( g.prior )
+        
+        return( g.prior )
+    
     }
-    
-    g.prior[ lower.tri( g.prior, diag = TRUE ) ] <- 0
-    g.prior = g.prior + t( g.prior )
-    
-    return( g.prior )
 }
      
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - |
 get_g_start = function( g.start, g_prior, p )
 {
+    #Modified so that g_prior is not actually used. Minor modification
     if( is.matrix( g.start ) )
     {
         if( ( sum( g.start == 0 ) + sum( g.start == 1 ) ) != ( p ^ 2 ) ) stop( " Element of 'g.start', as a matrix, must be 0 or 1" )
@@ -55,8 +66,8 @@ get_g_start = function( g.start, g_prior, p )
     
     if( ( nrow( G ) != p ) | ( ncol( G ) != p ) ) stop( " 'g.start' and 'data' have non-conforming size" )
     
-    G[ g_prior == 1 ] = 1
-    G[ g_prior == 0 ] = 0
+    #G[ g_prior == 1 ] = 1
+    #G[ g_prior == 0 ] = 0
     
     G[ lower.tri( G, diag( TRUE ) ) ] <- 0
     G  = G + t( G )

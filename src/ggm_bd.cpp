@@ -18,7 +18,7 @@ extern "C" {
 // for case D = I_p 
 // it is for maximum a posterior probability estimation (MAP)
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - |
-void ggm_bdmcmc_map( int *iter, int *burnin, int G[], double g_prior[], double Ts[], double K[], 
+void ggm_bdmcmc_map( int *iter, int *burnin, int G[], double g_prior[], int *FGM_ptr_gprior_length, double Ts[], double K[], 
                     int *p, double *threshold, int all_graphs[], double all_weights[], double K_hat[], 
                     char *sample_graphs[], double graph_weights[], int *size_sample_g,
                     int *b, int *b_star, double Ds[], int *print )
@@ -26,9 +26,7 @@ void ggm_bdmcmc_map( int *iter, int *burnin, int G[], double g_prior[], double T
 	int print_c = *print, iteration = *iter, burn_in = *burnin, count_all_g = 0;
 	int index_selected_edge, selected_edge_i, selected_edge_j, selected_edge_ij, size_sample_graph = *size_sample_g;
 	int i, j, ij, one = 1, dim = *p, pxp = dim * dim;
-
 	double Dsij, sum_weights = 0.0, weight_C, sum_rates;
-	
 	bool this_one;
 
 	string string_g;
@@ -52,7 +50,12 @@ void ggm_bdmcmc_map( int *iter, int *burnin, int G[], double g_prior[], double T
 	int qp = dim * ( dim - 1 ) / 2;
 	vector<char> char_g( qp );              // char string_g[pp];
 
-	// Counting size of notes
+	// FGM modification,
+	int FGM_gprior_length = *FGM_ptr_gprior_length;
+	int PriorType(-1); //integer that defines the type of prior. 1 is for BetaBernoulli, 2 for Bernoulli
+	(FGM_gprior_length==2) ? PriorType=1 : PriorType=2; //1 is BetaBernoulli, 2 is Bernoulli
+
+	// Counting size of nodes
 	int ip;
 	vector<int> size_node( dim, 0 );
 	for( i = 0; i < dim; i++ )
@@ -71,27 +74,50 @@ void ggm_bdmcmc_map( int *iter, int *burnin, int G[], double g_prior[], double T
 		{
 		    ij = j * dim + i;
 		    
-		    if( ( g_prior[ ij ] != 0.0 ) or ( g_prior[ ij ] != 1.0 ) )
-		    {
-		        index_row[ counter ] = i;
-		        index_col[ counter ] = j;
-		        counter++;
+		    if(PriorType==2){
+
+		    	if( ( g_prior[ ij ] != 0.0 ) or ( g_prior[ ij ] != 1.0 ) )
+		    	{
+		        	index_row[ counter ] = i;
+		        	index_col[ counter ] = j;
+		        	counter++;
+		    	}	
 		    }
-		    
+		    else{
+		    	index_row[ counter ] = i;
+		        index_col[ counter ] = j;
+		    	counter++;
+		    }
+
 		    // for calculating the birth/death rates
 		    Dsij        = Ds[ ij ];
 		    Dsijj[ ij ] = Dsij * Dsij / Ds[ j * dim + j ]; 
 		}
+
 	int sub_qp = counter;
 	vector<double> rates( sub_qp );
 
-	vector<double> log_ratio_g_prior( pxp );	
-	for( j = 1; j < dim; j++ )
-		for( i = 0; i < j; i++ )
-		{
-			ij = j * dim + i;
-			log_ratio_g_prior[ ij ] = log( static_cast<double>( g_prior[ ij ] / ( 1 - g_prior[ ij ] ) ) );
-		}
+	vector<double> log_ratio_g_prior;
+	if(PriorType==2)
+	{
+		log_ratio_g_prior.resize(pxp);
+			for( j = 1; j < dim; j++ )
+			{
+				for( i = 0; i < j; i++ )
+				{
+					ij = j * dim + i;
+					log_ratio_g_prior[ ij ] = log( static_cast<double>( g_prior[ ij ] / ( 1 - g_prior[ ij ] ) ) );
+				}	
+			}
+		
+	}
+	else{
+		log_ratio_g_prior.resize(2);
+		log_ratio_g_prior[0] = g_prior[0];
+		log_ratio_g_prior[1] = g_prior[1];
+	}
+		
+	
 
 // - - Main loop for birth-death MCMC - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -| 
 	GetRNGstate();
@@ -100,8 +126,14 @@ void ggm_bdmcmc_map( int *iter, int *burnin, int G[], double g_prior[], double T
 		//if( ( i_mcmc + 1 ) % print_c == 0 ) Rprintf( " Iteration  %d                 \n", i_mcmc + 1 ); 
 		
 // - - - STEP 1: calculating birth and death rates - - - - - - - - - - - - - - - - - - - - - - - - |		
+		if(PriorType==2){
 
-		rates_bdmcmc_parallel( &rates[0], &log_ratio_g_prior[0], G, &index_row[0], &index_col[0], &sub_qp, Ds, &Dsijj[0], &sigma[0], &K[0], b, &dim );
+			rates_bdmcmc_parallel( &rates[0], &log_ratio_g_prior[0], &PriorType, G, &index_row[0], &index_col[0], &sub_qp, Ds, &Dsijj[0], &sigma[0], &K[0], b, &dim );
+		}
+		else{
+			rates_bdmcmc_parallel( &rates[0], &log_ratio_g_prior[0], &PriorType, G, &index_row[0], &index_col[0], &sub_qp, Ds, &Dsijj[0], &sigma[0], &K[0], b, &dim );
+		}
+		
 		
 		// Selecting an edge based on birth and death rates
 		select_edge( &rates[0], &index_selected_edge, &sum_rates, &sub_qp );

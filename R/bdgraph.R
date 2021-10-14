@@ -13,7 +13,8 @@
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - |
 
 #' BDgraph function for sampling from GGM
-#'
+#' @param g.prior May take a single value, a full pxp matrix or a vector of length 2. The first two cases refer to a Bernoulli prior where the parameter is equal for all the possible links (first case)
+#' or it is link specific (second case). The third case refers to the multiplicity correction prior (Bernoulli-Beta) and it takes the two Beta hyperparameters.
 #' @export
 bdgraph = function( data, n = NULL, method = "ggm", algorithm = "bdmcmc", iter = 5000,
                     burnin = iter / 2, not.cont = NULL, g.prior = 0.5, df.prior = 3,
@@ -53,8 +54,11 @@ bdgraph = function( data, n = NULL, method = "ggm", algorithm = "bdmcmc", iter =
     Ti     = chol( solve( D ) )   # only for double Metropolic-Hastings algorithms
 
     g_prior = get_g_prior( g.prior = g.prior, p = p )
+    FGM_gprior_length = dim(g_prior)[1]*dim(g_prior)[2]
+
     G       = get_g_start( g.start = g.start, g_prior = g_prior, p = p )
     K       = get_K_start( G = G, g.start = g.start, Ts = Ts, b_star = b_star, threshold = threshold )
+
     if( save == TRUE )
     {
         qp1           = ( p * ( p - 1 ) / 2 ) + 1
@@ -78,28 +82,31 @@ bdgraph = function( data, n = NULL, method = "ggm", algorithm = "bdmcmc", iter =
     last_graph = K_hat
     last_K     = K_hat
 
-    if( ( is.null( jump ) ) && ( p > 10 & iter > ( 5000 / p ) ) )
+    if( ( is.null( jump ) ) && ( p > 10 & iter > ( 5000 / p ) ) ){
         jump = floor( p / 10 )
+    }
 
     if( is.null( jump ) ) jump = 1
 
     if( ( p < 10 ) && ( jump > 1 ) )      cat( " WARNING: the value of jump should be 1 " )
     if( jump > min( p, sqrt( p * 11 ) ) ) cat( " WARNING: the value of jump should be smaller " )
-
     # mes <- paste( c( iter, " iteration is started.                    " ), collapse = "" )
     # cat( mes, "\r" )
 
     # - -  main BDMCMC algorithms implemented in C++ - - - - - - - - - - - - - |
     if( save == TRUE )
     {
-        if( ( method == "ggm" ) && ( algorithm == "bdmcmc" ) && ( jump == 1 ) )
+        if( ( method == "ggm" ) && ( algorithm == "bdmcmc" ) ) #FGM removes the jump == 1 condition
         {
-            result = .C( "ggm_bdmcmc_map", as.integer(iter), as.integer(burnin), G = as.integer(G), as.double(g_prior), as.double(Ts), K = as.double(K), as.integer(p), as.double(threshold),
+            result = .C( "ggm_bdmcmc_map",as.integer(iter), as.integer(burnin), G = as.integer(G), as.double(g_prior),  as.integer(FGM_gprior_length),
+                         as.double(Ts), K = as.double(K), as.integer(p), as.double(threshold),
                          all_graphs = as.integer(all_graphs), all_weights = as.double(all_weights), K_hat = as.double(K_hat),
                          sample_graphs = as.character(sample_graphs), graph_weights = as.double(graph_weights), size_sample_g = as.integer(size_sample_g),
                          as.integer(b), as.integer(b_star), as.double(Ds), as.integer(print), PACKAGE = "FGM" )
         }
-
+        else{
+            stop('FGM can handle only the jump == 1 case. Code should be cleaned up.')
+        }
         #if( ( method == "ggm" ) && ( algorithm == "bdmcmc" ) && ( jump != 1 ) )
 #        {
 #            counter_all_g = 0
@@ -111,6 +118,7 @@ bdgraph = function( data, n = NULL, method = "ggm", algorithm = "bdmcmc", iter =
 
     }else{
 
+        stop('FGM package can not handle the save==FALSE option in the bdgraph function')
         #if( ( method == "ggm" ) && ( algorithm == "bdmcmc" ) && ( jump == 1 )  )
 #        {
 #            result = .C( "ggm_bdmcmc_ma", as.integer(iter), as.integer(burnin), G = as.integer(G), as.double(g_prior), as.double(Ts), K = as.double(K), as.integer(p), as.double(threshold),
@@ -150,15 +158,17 @@ bdgraph = function( data, n = NULL, method = "ggm", algorithm = "bdmcmc", iter =
         output = list( sample_graphs = sample_graphs, graph_weights = graph_weights, K_hat = K_hat,
                        all_graphs = all_graphs, all_weights = all_weights, last_graph = last_graph, last_K = last_K )
     }else{
-        p_links = matrix( result $ p_links, p, p, dimnames = list( colnames_data, colnames_data ) )
 
-        if( ( algorithm == "rjmcmc" ) | ( algorithm == "rj-dmh" ) )
-        {
-            p_links = p_links / ( iter - burnin )
-            K_hat   = K_hat   / ( iter - burnin )
-        }
-        p_links[ lower.tri( p_links ) ] = 0
-        output = list( p_links = p_links, K_hat = K_hat, last_graph = last_graph, last_K = last_K )
+        stop('FGM package can not handle the save==FALSE option in the bdgraph function')
+        #p_links = matrix( result $ p_links, p, p, dimnames = list( colnames_data, colnames_data ) )
+#
+        #if( ( algorithm == "rjmcmc" ) | ( algorithm == "rj-dmh" ) )
+        #{
+            #p_links = p_links / ( iter - burnin )
+            #K_hat   = K_hat   / ( iter - burnin )
+        #}
+        #p_links[ lower.tri( p_links ) ] = 0
+        #output = list( p_links = p_links, K_hat = K_hat, last_graph = last_graph, last_K = last_K )
     }
 
     class( output ) = "bdgraph"

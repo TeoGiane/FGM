@@ -495,13 +495,30 @@ void select_multi_edges( double rates[], int index_selected_edges[], int *size_i
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - |
 // Parallel Computation for birth-death rates for BD-MCMC algorithm
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - |
-void rates_bdmcmc_parallel( double rates[], double log_ratio_g_prior[], int G[], int index_row[], int index_col[], int *sub_qp, double Ds[], double Dsijj[],
+
+// log_ratio_g_prior contains log(g_prior[ij]/(1-g_prior[ij])) if called in the Bernoulli case, or it contains the Beta hyparameters (a,b) if called in the BetaBernouolli case.
+// Prior is 1 for BetaBernoulli case, 2 for Bernoulli case
+void rates_bdmcmc_parallel( double rates[], double log_ratio_g_prior[], int *Prior, int G[], int index_row[], int index_col[], int *sub_qp, double Ds[], double Dsijj[],
 				            double sigma[], double K[], int *b, int *p )
 {
 	int b1 = *b, one = 1, two = 2, dim = *p, p1 = dim - 1, p2 = dim - 2, dim1 = dim + 1, p2x2 = ( dim - 2 ) * 2;
 	double alpha = 1.0, beta = 0.0, alpha1 = -1.0, beta1 = 1.0;
 	char transT = 'T', transN = 'N', sideL = 'L';																	
 
+	int E(0); //number of link currently in the graph
+	int possible_links = dim*(dim-1)*0.5;
+	if(*Prior == 1)
+	{
+		int ij(-1);
+		for(int j = 1; j < dim; j++ ){
+			for(int i = 0; i < j; i++ )
+			{
+			    ij = j * dim + i;
+			    E += G[ij];
+			}    
+		}
+
+	}
 	#pragma omp parallel
 	{
 		int i, j, k, ij, jj, nu_star;
@@ -519,8 +536,7 @@ void rates_bdmcmc_parallel( double rates[], double log_ratio_g_prior[], int G[],
 		double *sigma11_inv         = new double[ 4 ];  
 		double *sigma21xsigma11_inv = new double[ p2x2 ];  
 		double *K12xK22_inv         = new double[ p2x2 ];  
-
-		#pragma omp for
+	#pragma omp for
 		for( int counter = 0; counter < *sub_qp; counter++ )
 		{
 			i  = index_row[ counter ];
@@ -574,13 +590,33 @@ void rates_bdmcmc_parallel( double rates[], double log_ratio_g_prior[], int G[],
 			for( k = 0; k < dim; k++ ) nu_star += G[ i * dim + k ] * G[ j * dim + k ];   
 			//nu_star = F77_NAME(ddot)( &dim, &G[0] + ixdim, &one, &G[0] + jxdim, &one );
 			nu_star = 0.5 * nu_star;
-
-			log_rate = ( G[ ij ] )   
+		log_rate = ( G[ ij ] )   
 				? 0.5 * log( 2.0 * Dsjj / a11 ) + lgammafn( nu_star + 0.5 ) - lgammafn( nu_star ) - 0.5 * ( Dsijj[ ij ] * a11 + sum_diag )
 				: 0.5 * log( 0.5 * a11 / Dsjj ) - lgammafn( nu_star + 0.5 ) + lgammafn( nu_star ) + 0.5 * ( Dsijj[ ij ] * a11 + sum_diag );
 			
 			//log_rate = ( G[ij] ) ? log_rate - log( static_cast<double>( g_prior[ij] / ( 1 - g_prior[ij] ) ) ) : log_rate + log( static_cast<double>( g_prior[ij] / ( 1 - g_prior[ij] ) ) );
-			log_rate = ( G[ ij ] ) ? log_rate - log_ratio_g_prior[ ij ] : log_rate + log_ratio_g_prior[ ij ];
+			if(*Prior == 2){ //Bernoulli
+				log_rate = ( G[ ij ] ) ? log_rate - log_ratio_g_prior[ ij ] : log_rate + log_ratio_g_prior[ ij ];
+			}	
+			else if(*Prior == 1){ //BetaBernoulli
+
+				if(G[ij] == 1){ //death move
+					if(E==0){
+						std::cout<<"NON POSSO MORIRE IN GRAFO VUOTO"<<std::endl;
+					}
+					log_rate += log((possible_links - E)/(log_ratio_g_prior[1] + possible_links - E - 1)) + log( (log_ratio_g_prior[0]+E)/(E) );
+				}
+				else{ //birth move
+					if(E==possible_links){
+						std::cout<<"NON POSSO NASCERE IN GRAFO PIENO"<<std::endl;
+					}
+					log_rate += log((log_ratio_g_prior[1] + possible_links - E)/(possible_links - E)) + log( (E)/(log_ratio_g_prior[0]+E-1) );
+				}
+			}
+			else{
+				std::cout<<"Impossibiee"<<std::endl;
+				//throw std::runtime_error("Can not handle this kind of prior");
+			}
 
 			rates[ counter ] = ( log_rate < 0.0 ) ? exp( log_rate ) : 1.0;
 		}

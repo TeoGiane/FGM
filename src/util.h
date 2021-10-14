@@ -29,6 +29,11 @@
 #include <functional>        // for transform function
 #include <climits>
 
+//FGM
+#include <iostream> //FGM for printing test
+#include <stdexcept> //FGM for stoppping the code
+#include <iterator>
+
 #ifndef FCONE
 # define FCONE
 #endif

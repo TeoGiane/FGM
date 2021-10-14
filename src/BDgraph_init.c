@@ -6,7 +6,7 @@ Check these declarations against the C/Fortran source code.
 */
 
 /* .C calls */
-extern void ggm_bdmcmc_map(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
+extern void ggm_bdmcmc_map(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
 extern void log_exp_mc(void *, void *, void *, void *, void *, void *, void *, void *);
 extern void omp_set_num_cores(void *);
 extern void rgwish_c(void *, void *, void *, void *, void *, void *);
@@ -15,7 +15,7 @@ extern void scale_free(void *, void *);
 extern void transfer_data(void *, void *, void *, void *, void *);
 
 static const R_CMethodDef CEntries[] = {
-    {"ggm_bdmcmc_map",                         (DL_FUNC) &ggm_bdmcmc_map,                         18},
+    {"ggm_bdmcmc_map",                         (DL_FUNC) &ggm_bdmcmc_map,                         19},
     {"log_exp_mc",                             (DL_FUNC) &log_exp_mc,                              8},
     {"omp_set_num_cores",                      (DL_FUNC) &omp_set_num_cores,                       1},
     {"rgwish_c",                               (DL_FUNC) &rgwish_c,                                6},

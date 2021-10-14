@@ -12,6 +12,8 @@
 #     Computing posterior probabilities of all possible links                  |
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - |
 
+#' Bdgrah function to compute the plinks matrix
+#' @export
 plinks = function( bdgraph.obj, round = 2, burnin = NULL )
 {
     if( ( !inherits( bdgraph.obj, "bdgraph" ) ) && ( !inherits( bdgraph.obj, "ssgraph" ) ) )

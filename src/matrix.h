@@ -15,6 +15,7 @@
 
 #include "util.h"
 
+
 extern "C" {
 	void sub_matrix( double A[], double sub_A[], int sub[], int *p_sub, int *p  );
 
@@ -46,7 +47,7 @@ extern "C" {
 
 	void select_multi_edges( double rates[], int index_selected_edges[], int *size_index, double *sum_rates, int *multi_update, int *qp );
 
-	void rates_bdmcmc_parallel( double rates[], double log_ratio_g_prior[], int G[], int index_row[], int index_col[], int *sub_qp, double Ds[], double Dsijj[],
+	void rates_bdmcmc_parallel( double rates[], double log_ratio_g_prior[], int *Prior, int G[], int index_row[], int index_col[], int *sub_qp, double Ds[], double Dsijj[],
 					            double sigma[], double K[], int *b, int *p );
 
 	void rates_cbdmcmc_parallel( long double rates[], double log_ratio_g_prior[], int G[], int index_row[], int index_col[], int *sub_qp, double r_Ds[], double i_Ds[],
