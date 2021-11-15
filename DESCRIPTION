@@ -4,7 +4,7 @@ Version: 1.0.27
 Authors@R: 
     person(given = "Laura",
            family = "Codazzi",
-           role = c("aut"))
+           role = c("aut", "cre"), email="laura.codazzi@tuhh.de")
     person(given = "Alessandro",
            family = "Colombi",
            role = c("aut", "cre"), email="a.colombi10@campus.unimib.it")
