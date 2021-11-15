@@ -14,7 +14,7 @@ install.packages(c("stringr", "coda", "fields", "e1071", "fda"))
 ```
 The package can be installed using:
 ```R
-devtools::install_github("TeoGiane/FGM", ref = 'dev')
+devtools::install_github("TeoGiane/FGM")
 library("FGM")
 ```
 
@@ -23,10 +23,13 @@ library("FGM")
 We considered only the subgroup made of strawberry purees, discarding the others.
 ```R
 # load data ---------------------------------------------------------------
+
 data("StrawberryPurees")
 data("StrawberryWavelengths")
 fgmobj <- create_structure()
+
 # set parameters ----------------------------------------------------------
+
 #dim
 n = dim(StrawberryPurees)[1]
 r = dim(StrawberryPurees)[2]
@@ -46,8 +49,6 @@ hyper[[4]] <- 3
 hyper[[5]] <- gprior
 names(hyper) <- c('a_tau_eps', 'b_tau_eps', 'sigma_mu', 'd0', 'gprior')
 
-
-
 # initial values ----------------------------------------------------------
 
 init <- list()
@@ -59,8 +60,7 @@ init[[5]] = diag(rep(1,fgmobj$p))
 init[[6]] = 1
 names(init) = c('basemat', 'G0', 'Beta0', 'mu0', 'K0', 'tau_eps0')
 
-
-# niter -------------------------------------------------------------------
+# sampler parameters ------------------------------------------------------
 
 niter <- 100000
 nburn <-  20000
@@ -69,13 +69,11 @@ thinG <-      2
 iter_to_store <- (niter - nburn)/thin
 iter_to_storeG <- (niter - nburn)/thinG
 
-
-
 # run ---------------------------------------------------------------------
 
 fit <- FGM_sampler(data = data, niter=niter, nburn=nburn, thin=thin, thinG=thinG, init=init, hyper=hyper)
 
-# read results -----------------------------------------------------------------
+# read results ------------------------------------------------------------
 
 beta_list = list()
 for(i in 1:dim(fgmobj$basemat)[1]){
