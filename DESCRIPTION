@@ -1,13 +1,13 @@
 Package: FGM
 Title: Bayesian Functional Graphical Models with R
-Version: 1.0.26-1
+Version: 1.0.27
 Authors@R: 
     person(given = "Laura",
            family = "Codazzi",
            role = c("aut"))
     person(given = "Alessandro",
            family = "Colombi",
-           role = c("aut"))
+           role = c("aut", "cre"), email="a.colombi10@campus.unimib.it")
     person(given = "Matteo",
            family = "Gianella",
            role = c("aut", "cre"), email="matteo.gianella@polimi.it")
