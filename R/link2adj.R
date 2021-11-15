@@ -1,13 +1,17 @@
-## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - |
-#     Copyright (C) 2012 - 2019  Reza Mohammadi                                |
-#                                                                              |
-#     This file is part of BDgraph package.                                    |
-#                                                                              |
-#     BDgraph is free software: you can redistribute it and/or modify it under |
-#     the terms of the GNU General Public License as published by the Free     |
-#     Software Foundation; see <https://cran.r-project.org/web/licenses/GPL-3>.|
-#                                                                              |
-#     Maintainer: Reza Mohammadi <a.mohammadi@uva.nl>                          |
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - |
+#     Copyright (C)  Laura Codazzi, Alessandro Colombi, Matteo Gianella                           |
+#                                                                                                 |
+#     Part of this code is adapted from BDgraph package (C Reza Mohammadi)                        |
+#                                                                                                 |
+#     FGM is free software: you can redistribute it and/or modify it under                        |
+#     the terms of the GNU General Public License as published by the Free                        |
+#     Software Foundation; see <https://cran.r-project.org/web/licenses/GPL-3>.                   |
+#                                                                                                 |
+#     Maintainer: Laura Codazzi (laura.codazzi@tuhh.de),                                          |
+#                 Alessandro Colombi (a.colombi10@campus.unimib.it),                              |
+#                 Matteo Gianella (matteo.gianella@polimi.it)                                     |
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - |
+
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - |
 #     Creating an adjacency matrix based on links                              |
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - |
