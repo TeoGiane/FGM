@@ -4,8 +4,8 @@
 The `R` package **FGM** provides statistical tools for Bayesian structural learning in the framework of functional data analysis. The package implements the model presented in
 [Codazzi et al. (2021)](https://arxiv.org/abs/2103.11666). To learn the structre of dependencies, this package exploits the efficien Birth and Death approach presented in  
 [Mohammadi and Wit (2015)](https://projecteuclid.org/journals/bayesian-analysis/volume-10/issue-1/Bayesian-Structure-Learning-in-Sparse-Gaussian-Graphical-Models/10.1214/14-BA889.full)
-and implemented in the `R` package **BDgraph **, available [here](https://github.com/cran/BDgraph). Such a package is not loaded in **FGM** as the authors needed to slightly modify
-the **BDgraph** code to adapt it to their needs. As a consequence, parts of the **BDgraph** code have been included in the package. For those, all rights are reserved to **BDgraph**.
+and implemented in the `R` package `BDgraph`, available [here](https://github.com/cran/BDgraph). Such a package is not loaded in **FGM** as the authors needed to slightly modify
+the **BDgraph** code to adapt it to their needs. As a consequence, parts of the `BDgraph` code have been included in the package. For those, all rights are reserved to `BDgraph`.
 
 ## Installation
 **FGM** requires the loading of some `R` packages. Run in the `R` console the following line to make sure that they are available.
