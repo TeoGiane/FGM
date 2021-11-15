@@ -16,6 +16,27 @@
 #' @source \url{https://csr.quadram.ac.uk/example-datasets-for-download/}
 "purees"
 
+#' Absorbance mid-IR spectra of 351 strawberry purées.
+#'
+#' This is a shortcut to load only a part of the dataset described in \code{\link{purees}}.
+#' This dataset contains only the 351 absorbance spectra of strawberry purées, measured at 235 different wavelenghts.
+#' Differently from \code{\link{purees}}, this file contains only the data.frame of the measurments. The corresponding
+#' wavelengths can be loaded using \code{\link{StrawberryWavelengths}}.
+#'
+#' @usage data("StrawberryPurees")
+#'
+"StrawberryPurees"
+
+#' Grid of wavelengths where absorbance spectra are measured.
+#'
+#' This is a shortcut to load only a part of the dataset described in \code{\link{purees}}.
+#' This dataset contains a vector of 235 elements representing the grid where the absorbance spectra availabe in \code{\link{StrawberryPurees}}
+#' are measured.
+#'
+#' @usage data("StrawberryWavelengths")
+#'
+"StrawberryWavelengths"
+
 #' Peterson's Graphs and Precision Matrices
 #'
 #' This dataset contains a list of four elements, which contains the graph and precision matrices

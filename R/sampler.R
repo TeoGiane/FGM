@@ -40,7 +40,8 @@
 #' @export
 FGM_sampler <- function(data, niter, nburn, thin, thinG, init, hyper=NULL) {
   #library('BDgraph')
-
+  if( niter < 0 )
+  stop('niter must be positive')
   # Check data
   if(is.null(data) || is.null(niter) || is.null(nburn) ||
      is.null(thin) || is.null(thinG) || is.null(init)) {
@@ -141,7 +142,7 @@ FGM_sampler <- function(data, niter, nburn, thin, thinG, init, hyper=NULL) {
     Kmu = K%*%mu
     for (i in 1:n) {
       bn_i <- B_n %*% (tau_eps*base_y[[i]] + Kmu)
-      beta[[i]] <- rmvnorm(1, mean = bn_i, sigma = B_n)
+      beta[[i]] <- FGM::rmvnorm(1, mean = bn_i, sigma = B_n)
     }
 
 
@@ -153,9 +154,9 @@ FGM_sampler <- function(data, niter, nburn, thin, thinG, init, hyper=NULL) {
     A = solve(diag(rep(1/sigma_mu, p)) + n*K)
     #inv_A = solve(A)
     #a = inv_A %*% (K%*%t(Sni))
-    #mu = as.numeric(rmvnorm(1, mean = a, sigma = inv_A))
+    #mu = as.numeric(FGM::rmvnorm(1, mean = a, sigma = inv_A))
     a = A %*% (K%*%t(Sni))
-    mu = as.numeric(rmvnorm(1, mean = a, sigma = A))
+    mu = as.numeric(FGM::rmvnorm(1, mean = a, sigma = A))
 
     # (K, G) parameters update and joint draw
     data_BD = matrix(0,nrow = p, ncol = p)
@@ -163,10 +164,10 @@ FGM_sampler <- function(data, niter, nburn, thin, thinG, init, hyper=NULL) {
       data_BD = data_BD  + t(beta[[i]] - mu)%*%(beta[[i]] - mu)
     }
     if(iter != 1) {
-      fit = BDgraph::bdgraph(data = data_BD, n = n, method = 'ggm', algorithm = 'bdmcmc', iter = 1, burnin = 0,
+      fit = FGM::bdgraph(data = data_BD, n = n, method = 'ggm', algorithm = 'bdmcmc', iter = 1, burnin = 0,
                     g.prior = gprior, df.prior = d0, g.start = fit$last_graph, save = T)
     } else {
-      fit = BDgraph::bdgraph(data = data_BD, n = n, method = 'ggm', algorithm = 'bdmcmc', iter = 1, burnin = 0,
+      fit = FGM::bdgraph(data = data_BD, n = n, method = 'ggm', algorithm = 'bdmcmc', iter = 1, burnin = 0,
                     g.prior = gprior, df.prior = d0, g.start = G0, save = T)
     }
     K = fit$last_K
@@ -228,7 +229,7 @@ FGM_sampler <- function(data, niter, nburn, thin, thinG, init, hyper=NULL) {
   result[[n+5]] = result[[n+5]]/sum(result[[n+3]]$peso)
 
   # bdgraph object creation through helpers
-  bdobj = bdgraph(diag(rep(4,5)), n = 3, iter = 1, save = T)
+  bdobj = FGM::bdgraph(diag(rep(4,5)), n = 3, iter = 1, save = T)
   bdobj$sample_graphs = result[[n+3]]$codice
   bdobj$graph_weights = result[[n+3]]$peso
   bdobj$K_hat = result[[n+5]]

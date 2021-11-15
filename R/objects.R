@@ -102,13 +102,13 @@ create_structure <- function(n = 351, p = 40, wave.indexes = c(1:235)){
   result[[1]] <- n
   result[[2]] <- p
 
-  data('purees'); data_tot = purees
-  X <- as.numeric(stringr::str_remove_all(names(data_tot[,-1]), "X"))
-  X <- X[wave.indexes]
-  strawberry <- data_tot[which(data_tot$Group=="Strawberry"),]
+  data('purees');data_tot = purees
+  X <- data_tot$wavelengths
+  strawberry <- data_tot$data[which(data_tot$data$Group=="Strawberry"),]
   Y <- as.matrix(strawberry[,-1])
   data <- Y[1:n, ]
   result[[3]] <- data
+
 
   range_x <- range(X)
   r = length(X)

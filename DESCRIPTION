@@ -1,6 +1,6 @@
 Package: FGM
 Title: Bayesian Functional Graphical Models with R
-Version: 1.0.25
+Version: 1.0.26-1
 Authors@R: 
     person(given = "Laura",
            family = "Codazzi",
@@ -16,10 +16,12 @@ License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.2
+NeedsCompilation: yes
 Imports: 
     stringr (>= 1.4.0),
     coda (>= 0.19.3),
     fields (>= 10.0),
-    BDgraph (>= 2.61),
     e1071 (>= 1.7.3),
     fda (>= 2.4.8)
+Depends: 
+    R (>= 2.10)
