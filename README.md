@@ -23,13 +23,13 @@ library("FGM")
 We considered only the subgroup made of strawberry purees, discarding the others.
 ```R
 # load data ---------------------------------------------------------------
-data = read.table("StrawberryPurees.txt")
-wavelengths = read.table("wavelengths.txt")
+data("StrawberryPurees")
+data("StrawberryWavelengths")
 fgmobj <- create_structure()
 # set parameters ----------------------------------------------------------
 #dim
-n = dim(data)[1]
-r = dim(data)[2]
+n = dim(StrawberryPurees)[1]
+r = dim(StrawberryPurees)[2]
 p = 40
 
 #prior
@@ -73,7 +73,20 @@ iter_to_storeG <- (niter - nburn)/thinG
 
 # run ---------------------------------------------------------------------
 
-fit <- FGM_sampler(data = data, niter=niter, nburn=nburn, thin=thin, thinG=thinG,
-                   init=init, hyper=hyper)
+fit <- FGM_sampler(data = data, niter=niter, nburn=nburn, thin=thin, thinG=thinG, init=init, hyper=hyper)
+
+# read results -----------------------------------------------------------------
+
+beta_list = list()
+for(i in 1:dim(fgmobj$basemat)[1]){
+  beta_list[[i]] = fit[[i]]
+}
+
+beta_mean = beta_pointwise_estimate(beta_list, p)
+mu_mean = colMeans(fit$mu)
+tau_eps_mean = mean(fit$tau_eps)
+PL = plinks(fit$bdobject)
+G_fdr = FDR_analysis(PL, tol = seq(0.1,1,by = 0.01))$best_truncated_graph
+K_hat = fit$bdobject$K_hat
 
 ```
